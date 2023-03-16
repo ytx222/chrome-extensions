@@ -1,0 +1,58 @@
+{
+	"name": "ytx_chrome_util",
+	"description": "Base Level Extension",
+	"version": "1.0",
+	"manifest_version": 3,
+	// 权限
+	// https://developer.chrome.com/docs/extensions/mv3/declare_permissions/
+	"permissions": [
+		"contextMenus",
+		"tabs",
+		// 通知权限
+		"notifications",
+		"activeTab",
+		//使 Chrome 早启动晚关闭，这样扩展程序可以有更长的生命周期。
+		// 当任何已安装的扩展程序具有“后台”权限时，只要用户登录到他们的计算机，
+		// Chrome 就会（不可见地）运行——在用户启动 Chrome 之前。
+		// “后台”权限还使 Chrome 继续运行（即使在其最后一个窗口关闭后），直到用户明确退出 Chrome。
+		// "background",
+		"downloads"
+	],
+	"action": {
+		"default_popup": "./popup/index.html",
+		"default_icon": "./assets/fish.png"
+	},
+	"background": {
+		"service_worker": "./background.js",
+		"type": "module"
+	},
+	"icons": {
+		"128": "./assets/fish.png"
+	  },
+	"content_scripts": [
+		{
+			"js": [
+				"./scripts/douyin/chrome_douyin.js"
+			],
+			"matches": [
+				"https://www.douyin.com/*"
+			]
+		},
+		{
+			"js": [
+				"./scripts/ytx222/chrome_ytx222.js"
+			],
+			"matches": [
+				"https://www.ytx222.com/*"
+			]
+		}
+	],
+	"commands": {
+		"download-douyin": {
+			"suggested_key": {
+				"default": "Ctrl+Shift+Y"
+			},
+			"description": "download-douyin"
+		}
+	}
+}
