@@ -28,7 +28,7 @@
 	},
 	"icons": {
 		"128": "./assets/fish.png"
-	  },
+	},
 	"content_scripts": [
 		{
 			"js": [
@@ -49,9 +49,7 @@
 	],
 	"commands": {
 		"download-douyin": {
-			"suggested_key": {
-				"default": "Ctrl+Shift+Y"
-			},
+			"suggested_key": "Shift+Alt+D",
 			"description": "download-douyin"
 		}
 	}

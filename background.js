@@ -1,5 +1,5 @@
 console.log('背景服务运行');
-import { sendDouyinCommand} from './main.js'
+import { sendDouyinCommand } from './main.js';
 chrome.contextMenus.create({
 	title: '下载当前视频',
 	documentUrlPatterns: ['https://*.douyin.com/*'],
@@ -32,3 +32,25 @@ chrome.commands.onCommand.addListener(async command => {
 		sendDouyinCommand(command);
 	}
 });
+checkCommandShortcuts();
+
+// Only use this function during the initial install phase. After
+// installation the user may have intentionally unassigned commands.
+function checkCommandShortcuts() {
+	console.log('checkCommandShortcuts');
+	chrome.commands.getAll(commands => {
+		console.log(commands);
+		let missingShortcuts = [];
+
+		for (let { name, shortcut } of commands) {
+			if (shortcut === '') {
+				missingShortcuts.push(name);
+			}
+		}
+
+		if (missingShortcuts.length > 0) {
+			// Update the extension UI to inform the user that one or more
+			// commands are currently unassigned.
+		}
+	});
+}
