@@ -15,6 +15,7 @@ const getVideo = (document = _topDocument) => {
 let downloadIframe = null;
 
 async function ytx222_download_douyin_video(document = _topDocument, topDocument = _topDocument) {
+	console.log('ytx222_download_douyin_video');
 	window.tipsEl = window.tipsEl || null;
 	clearTips();
 	/**
@@ -117,19 +118,21 @@ function clearTips() {
 	} catch {}
 }
 
-function iframeDownload () {
+function iframeDownload() {
 	let url = location.href;
 	// 在第一层时,有时候会丢失参数,这里给他补上吧..
 	if (url === 'https://www.douyin.com/user/self?showTab=favorite_collection') {
-
-		const el=document.querySelector('[data-e2e-vid][data-e2e="feed-active-video"]')
+		const el = document.querySelector('[data-e2e-vid][data-e2e="feed-active-video"]');
 		if (el && el.dataset.e2eVid) {
 			url += '&video_id=' + el.dataset.e2eVid;
 		}
-
 	}
 
 	const newDIv = document.createElement('div');
+	// 如果已经有了,就先删除
+	if (downloadIframe) document.body.removeChild(downloadIframe);
+	downloadIframe = newDIv;
+
 	// 屏幕顶部显示
 	newDIv.style.cssText = `
 		position: fixed;
@@ -147,22 +150,19 @@ function iframeDownload () {
 	`;
 	newDIv.className = 'ytx222-iframe';
 
-	newDIv.onclick = () => {
-		document.body.removeChild(newDIv);
-	};
+	newDIv.onclick = closeIframe;
+
 	const iframe = document.createElement('iframe');
 	iframe.width = '100%';
 	iframe.height = '100%';
 	iframe.style.transform = 'scale(0.85)';
 	iframe.style.transformOrigin = 'center center';
 	iframe.src = location.href;
-	iframe.onclick = e => {
-		e.stopPropagation();
-	};
+	iframe.onclick = e => e.stopPropagation();
 
 	newDIv.appendChild(iframe);
 	document.body.appendChild(newDIv);
-	downloadIframe = newDIv;
+
 	showTips('加载中...');
 	setTimeout(() => {
 		var newWindow = iframe.contentWindow;
@@ -170,9 +170,10 @@ function iframeDownload () {
 
 		const download = async () => {
 			// 直接把下载视频写到这里应该也行的
-			await ytx222_download_douyin_video(newWindow.document, topDocument);
-			document.body.removeChild(newDIv);
-			downloadIframe = null;
+			await ytx222_download_douyin_video(newWindow.document, _topDocument);
+			// document.body.removeChild(newDIv);
+			// downloadIframe = null;
+			closeIframe()
 		};
 		const stopVideo = () =>
 			setTimeout(async () => {
@@ -186,6 +187,11 @@ function iframeDownload () {
 
 		newWindow.addEventListener('DOMContentLoaded', stopVideo);
 	}, 0);
+	function closeIframe() {
+		document.body.removeChild(newDIv);
+		hideTips();
+		downloadIframe = null;
+	}
 }
 
 // chrome.runtime.onStartup
