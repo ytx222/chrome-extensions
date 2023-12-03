@@ -121,10 +121,10 @@ function clearTips() {
 function iframeDownload() {
 	let url = location.href;
 	// 在第一层时,有时候会丢失参数,这里给他补上吧..
-	if (url === 'https://www.douyin.com/user/self?showTab=favorite_collection') {
+	if (url.startsWith('https://www.douyin.com/user/self') && !url.includes('modal_id')) {
 		const el = document.querySelector('[data-e2e-vid][data-e2e="feed-active-video"]');
 		if (el && el.dataset.e2eVid) {
-			url += '&video_id=' + el.dataset.e2eVid;
+			url += (url.includes('?') ? '&' : '?') + 'video_id=' + el.dataset.e2eVid;
 		}
 	}
 
@@ -173,7 +173,7 @@ function iframeDownload() {
 			await ytx222_download_douyin_video(newWindow.document, _topDocument);
 			// document.body.removeChild(newDIv);
 			// downloadIframe = null;
-			closeIframe()
+			closeIframe();
 		};
 		const stopVideo = () =>
 			setTimeout(async () => {
@@ -185,7 +185,7 @@ function iframeDownload() {
 				download();
 			}, 4);
 
-		newWindow.addEventListener('DOMContentLoaded', stopVideo);
+		newWindow?.addEventListener('DOMContentLoaded', stopVideo);
 	}, 0);
 	function closeIframe() {
 		document.body.removeChild(newDIv);
@@ -216,32 +216,36 @@ window.addEventListener(
 		console.log('ytx222--按下了esc');
 		console.log(this.location.href);
 		if (e.key === 'Escape') {
-			const el2 = document.querySelector('#upperFeedContainer [data-e2e="feed-active-video"] video');
-			if (el2) return;
-			// setTimeout(() => {
-			// 	const el = document.querySelector('#slidelist [data-e2e="feed-active-video"] video');
-			// 	if (el) {
-			// 		el.pause();
-			// 		// el.parentElement.parentElement.parentElement.parentElement.paren
-			// 	}
-			// }, 100);
-
-			if (location.href === 'https://www.douyin.com/user/self?showTab=favorite_collection') {
-				// 关闭当前视频
-				// 抖音bug,反正是代码报错了
-				console.log('ytx222--执行关闭弹窗');
-				document.querySelectorAll('.isDark > svg,.ZCHTRJzJ')[0].click();
-			}
-
-			// if (el || el2) {
-			// 	e.preventDefault();
-			// 	e.stopPropagation();
-			// 	return;
-			// }
+			closeCurFeedContainer();
 		}
 	},
 	true
 );
+
+function closeCurFeedContainer() {
+	const el2 = document.querySelector('#upperFeedContainer [data-e2e="feed-active-video"] video');
+	if (el2) return;
+	// setTimeout(() => {
+	// 	const el = document.querySelector('#slidelist [data-e2e="feed-active-video"] video');
+	// 	if (el) {
+	// 		el.pause();
+	// 		// el.parentElement.parentElement.parentElement.parentElement.paren
+	// 	}
+	// }, 100);
+
+	if (location.href === 'https://www.douyin.com/user/self?showTab=favorite_collection') {
+		// 关闭当前视频
+		// 抖音bug,反正是代码报错了
+		console.log('ytx222--执行关闭弹窗');
+		document.querySelectorAll('.isDark > svg,.ZCHTRJzJ')?.[0]?.click?.();
+	}
+
+	// if (el || el2) {
+	// 	e.preventDefault();
+	// 	e.stopPropagation();
+	// 	return;
+	// }
+}
 
 function* ElementParentIterator(el) {
 	let curEl = el;
@@ -251,6 +255,15 @@ function* ElementParentIterator(el) {
 	}
 	return null;
 }
+
+window.onerror = e => {
+	const msg = e.message;
+	// Uncaught TypeError: Cannot read properties of null (reading 'getCurTab')
+	if (msg.includes('getCurTab')) {
+		closeCurFeedContainer()
+	}
+};
+
 /**
  * for (const item of ElementParentIterator(e.target)) {
 			console.log(item);
