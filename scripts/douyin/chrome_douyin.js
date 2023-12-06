@@ -237,7 +237,14 @@ function closeCurFeedContainer() {
 		// 关闭当前视频
 		// 抖音bug,反正是代码报错了
 		console.log('ytx222--执行关闭弹窗');
-		document.querySelectorAll('.isDark > svg,.ZCHTRJzJ')?.[0]?.click?.();
+		const el = document.querySelectorAll('.isDark > svg')?.[0]
+		if (el) el.dispatchEvent(new PointerEvent('click', { type: 0, bubbles: true }))
+		else {
+			showTips('关闭弹窗失败');
+			setTimeout(() => {
+				hideTips();
+			}, 3000);
+		}
 	}
 
 	// if (el || el2) {
