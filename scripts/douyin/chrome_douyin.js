@@ -254,7 +254,7 @@ function closeCurFeedContainer(force = false) {
 			showTips('关闭弹窗失败');
 			setTimeout(() => {
 				hideTips();
-			}, 3000);
+			}, 1500);
 		}
 	}
 

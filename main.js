@@ -30,19 +30,33 @@ export async function sendDouyinCommand(command) {
 	}
 }
 
-chrome.contextMenus.removeAll();
+// chrome.app.runtime.onLaunched.addListener(function () {
+// 	chrome.app.window.create('a.html', { id: 'a', outerBounds: { top: 0, left: 0, width: 300, height: 300 } });
+// 	chrome.app.window.create('b.html', { id: 'b', outerBounds: { top: 0, left: 310, width: 300, height: 300 } });
+// });
 
-chrome.contextMenus.create({
-	title: '下载当前视频',
-	documentUrlPatterns: ['https://*.douyin.com/*'],
-	id: 'menu-download-douyin',
+chrome.runtime.onInstalled.addListener(function () {
+	// When the app gets installed, set up the context menus
+	// setUpContextMenus();
+	chrome.contextMenus.create({
+		title: '下载当前视频',
+		documentUrlPatterns: ['https://*.douyin.com/*'],
+		id: 'menu-download-douyin',
+	});
+
+	chrome.contextMenus.create({
+		title: '打开随机',
+		id: 'open_random_page',
+		// onclick: function () {
+		// 	console.log('11111');
+		// 	chrome.tabs.create({ url: 'https://www.ytx222.com/rests/4_random/index.html' });
+		// },
+	});
 });
 
-chrome.contextMenus.create({
-	title: '打开随机',
-	id: 'open_random_page',
-	// onclick: function () {
-	// 	console.log('11111');
-	// 	chrome.tabs.create({ url: 'https://www.ytx222.com/rests/4_random/index.html' });
-	// },
-});
+// chrome.contextMenus.onClicked.addListener(function (itemData) {
+// 	if (itemData.menuItemId == 'launcher0')
+// 		chrome.app.window.create('a.html', { id: 'a', outerBounds: { top: 0, left: 0, width: 300, height: 300 } });
+// 	if (itemData.menuItemId == 'launcher1')
+// 		chrome.app.window.create('b.html', { id: 'b', outerBounds: { top: 0, left: 310, width: 300, height: 300 } });
+// });
