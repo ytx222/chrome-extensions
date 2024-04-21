@@ -30,6 +30,8 @@ export async function sendDouyinCommand(command) {
 	}
 }
 
+chrome.contextMenus.removeAll();
+
 chrome.contextMenus.create({
 	title: '下载当前视频',
 	documentUrlPatterns: ['https://*.douyin.com/*'],

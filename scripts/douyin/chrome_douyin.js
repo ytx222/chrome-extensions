@@ -1,4 +1,5 @@
 console.log('ytx222--注入到抖音的js');
+window.tipsEl = window.tipsEl || null;
 
 window.ytx222_download_douyin_video = ytx222_download_douyin_video;
 
@@ -213,32 +214,42 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 window.addEventListener(
 	'keydown',
 	function (e) {
-		console.log('ytx222--按下了esc');
-		console.log(this.location.href);
-		if (e.key === 'Escape') {
-			closeCurFeedContainer();
+		console.log('ytx222--按下了' + e.key);
+		if (e.key === 'Escape' || e.key === 'q') {
+			console.log(this.location.href);
+			closeCurFeedContainer(e.key === 'q');
 		}
 	},
 	true
 );
 
-function closeCurFeedContainer() {
-	const el2 = document.querySelector('#upperFeedContainer [data-e2e="feed-active-video"] video');
-	if (el2) return;
-	// setTimeout(() => {
-	// 	const el = document.querySelector('#slidelist [data-e2e="feed-active-video"] video');
-	// 	if (el) {
-	// 		el.pause();
-	// 		// el.parentElement.parentElement.parentElement.parentElement.paren
-	// 	}
-	// }, 100);
+function closeCurFeedContainer(force = false) {
+	let el2 = document.querySelector('#upperFeedContainer [data-e2e="feed-active-video"] video');
+	console.log('closeCurFeedContainer', el2, force);
+	if (el2 && force === false) return;
 
-	if (location.href === 'https://www.douyin.com/user/self?showTab=favorite_collection') {
+	if (location.href === 'https://www.douyin.com/user/self?showTab=favorite_collection' || force ) {
 		// 关闭当前视频
 		// 抖音bug,反正是代码报错了
+		return close();
+	}
+	// 这个可能是应付
+	setTimeout(() => {
+		el2 = document.querySelector('#upperFeedContainer [data-e2e="feed-active-video"] video');
+		if (el2) {
+			el2.pause();
+			close();
+		}
+	}, 100);
+
+	// 推荐页 使用的是 < 而不是 × 不兼容,都是动态类名,没啥特征,算了
+	// 没想到我还是找到了特征,6
+	// :has还挺好用,这样说也能选择同级内的元素了
+	function close() {
 		console.log('ytx222--执行关闭弹窗');
-		const el = document.querySelectorAll('.isDark > svg')?.[0]
-		if (el) el.dispatchEvent(new PointerEvent('click', { type: 0, bubbles: true }))
+		let el = document.querySelectorAll('.isDark > svg')?.[0];
+		if(!el) el = document.querySelector('svg:has([filter^="url(#return_svg"])')
+		if (el) el.dispatchEvent(new PointerEvent('click', { type: 0, bubbles: true }));
 		else {
 			showTips('关闭弹窗失败');
 			setTimeout(() => {
@@ -247,11 +258,6 @@ function closeCurFeedContainer() {
 		}
 	}
 
-	// if (el || el2) {
-	// 	e.preventDefault();
-	// 	e.stopPropagation();
-	// 	return;
-	// }
 }
 
 function* ElementParentIterator(el) {
@@ -267,7 +273,7 @@ window.onerror = e => {
 	const msg = e.message;
 	// Uncaught TypeError: Cannot read properties of null (reading 'getCurTab')
 	if (msg.includes('getCurTab')) {
-		closeCurFeedContainer()
+		closeCurFeedContainer();
 	}
 };
 
