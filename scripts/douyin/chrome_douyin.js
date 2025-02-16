@@ -29,21 +29,50 @@ async function ytx222_download_douyin_video(document = _topDocument, topDocument
 	if (video) {
 		// 如果是blob
 		if (video.src.startsWith('blob:')) {
-			video.pause();
-			iframeDownload();
+			// video.pause();
+			// iframeDownload();
+			alert('blob请使用分享页面下载');
 			return;
 		}
 		const infoContainer = video.parentElement.parentElement.querySelector(
 			'.xgplayer-video-info-wrap .video-info-detail,#video-info-wrap '
 		);
-		let name = infoContainer?.querySelector('.account .account-name,.account')?.innerText || '';
+		/** 这里也可以切换成e2e形式的,不过目前好用就先这样
+		 * .account .account-name,.account
+		 */
+		let name = infoContainer?.querySelector('.account')?.innerText || '';
 		let desc = infoContainer?.querySelector('.title')?.innerText || '';
 		name = name.replace(/[\s@]/g, '');
 		desc = desc.replace(/[\s@]/g, '');
 		// 在视频详细页可能找不到具体内容,就使用id+title
-		if (name === '' && location.pathname) {
-			name = location.pathname.replace('/video/', '');
-			desc = document.title;
+		if (name === '') {
+			/**
+			 * .playerControlHeight [data-e2e="related-video"] [data-e2e="user-info"]
+			 * 内侧使用第二个元素,或者读取图片的alt都可以
+			 *
+			 * 实测发现一个页面可能有多个
+			 * [data-e2e="user-info"] ,应该是现成的组件,
+			 * 所以只需要
+			 * [data-e2e=user-info] [data-click-from=title]
+			 *
+			 */
+			name = document.querySelector('[data-e2e=user-info] [data-click-from=title]')?.innerText;
+			/**
+			 * data-e2e="detail-video-info"
+			 * h1 ?
+			 */
+			const pathname = location.pathname?.replace('/video/', '') || '';
+			/** @type {string} */
+			let publishTime =
+				document.querySelector('[data-e2e=detail-video-info] [data-e2e=detail-video-publish-time]')
+					?.innerText || '';
+			publishTime.replace('发布时间：', '');
+
+			desc = `${document.title}-${pathname}-${publishTime}`;
+			if (!name) {
+				name ||= pathname;
+				desc = document.title;
+			}
 		}
 		const fileName = name + '-' + desc + '.mp4';
 		/** 考虑吧tips移动到这一层 */ showTips('视频下载中...');
@@ -107,10 +136,10 @@ function showTips(msg) {
 		'opacity: 1;';
 	document.body.appendChild(tipsEl);
 }
-function hideTips(msg) {
-	tipsEl.style.opacity = 0;
+function hideTips(msg, time) {
+	tipsEl && (tipsEl.style.opacity = 0);
 	msg && (tipsEl.innerText = msg);
-	setTimeout(clearTips, 2000);
+	setTimeout(clearTips, time || 2000);
 }
 function clearTips() {
 	try {
@@ -228,7 +257,7 @@ function closeCurFeedContainer(force = false) {
 	console.log('closeCurFeedContainer', el2, force);
 	if (el2 && force === false) return;
 
-	if (location.href === 'https://www.douyin.com/user/self?showTab=favorite_collection' || force ) {
+	if (location.href === 'https://www.douyin.com/user/self?showTab=favorite_collection' || force) {
 		// 关闭当前视频
 		// 抖音bug,反正是代码报错了
 		return close();
@@ -248,16 +277,15 @@ function closeCurFeedContainer(force = false) {
 	function close() {
 		console.log('ytx222--执行关闭弹窗');
 		let el = document.querySelectorAll('.isDark > svg')?.[0];
-		if(!el) el = document.querySelector('svg:has([filter^="url(#return_svg"])')
+		if (!el) el = document.querySelector('svg:has([filter^="url(#return_svg"])');
 		if (el) el.dispatchEvent(new PointerEvent('click', { type: 0, bubbles: true }));
 		else {
 			showTips('关闭弹窗失败');
 			setTimeout(() => {
-				hideTips();
-			}, 1500);
+				hideTips(null, 1000);
+			}, 500);
 		}
 	}
-
 }
 
 function* ElementParentIterator(el) {
